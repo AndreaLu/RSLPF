@@ -10,7 +10,7 @@ Sequence::Sequence(float* source)
 	this->lenght = sizeof(source) / sizeof (float);
 }
 
-Sequence Sequence::operator * (Sequence h)
+Sequence& Sequence::operator* (Sequence& h)
 {
 	unsigned int totalLenght = (this->lenght + h.lenght - 1);
 	unsigned int i, j;
@@ -28,3 +28,26 @@ Sequence Sequence::operator * (Sequence h)
 	return return_V;
 }
 
+Sequence& Sequence::operator^ (Sequence& h){
+	unsigned int i;
+	float* y = new float[min(this->lenght, h.lenght)];
+
+	for (i = 0; i < min(this->lenght, h.lenght); i++){
+		y[i] = this->data[i] * h.data[i];
+	}
+	
+	Sequence return_V(y);
+	return return_V;
+}
+
+Sequence& Sequence::operator+ (Sequence& h){
+	unsigned int i;
+	float* y = new float[min(this->lenght, h.lenght)];
+
+	for (i = 0; i < min(this->lenght, h.lenght); i++){
+		y[i] = this->data[i] + h.data[i];
+	}
+
+	Sequence return_V(y);
+	return return_V;
+}

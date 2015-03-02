@@ -58,7 +58,9 @@ private:
 public:
 	Sequence();
 	Sequence(float* existing);
-	Sequence operator * (Sequence h);
+	Sequence& operator* (Sequence& h);  //Convoluzione di due sequenze
+	Sequence& operator^ (Sequence& h);	//Prodotto membro-a-membro di due sequenze
+	Sequence& operator+ (Sequence& h);  //Somma membro-a-membro di due sequenze
 	void dft();
 	void fft();
 };
