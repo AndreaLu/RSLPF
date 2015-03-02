@@ -53,7 +53,7 @@ void BMPImage::toFile(const char* filename)
 	fileInfo.biPlanes = 1;
 	fileInfo.biBitCount = 24;
 	fileInfo.biCompression = BI_RGB;
-	fileInfo.biSizeImage = 640 * 480 * (24 / 8);
+	fileInfo.biSizeImage = this->height * this->width * (24 / 8); //3
 	fileInfo.biXPelsPerMeter = 2400;
 	fileInfo.biYPelsPerMeter = 2400;
 	fileInfo.biClrImportant = 0;
@@ -113,7 +113,7 @@ void BMPImage::fromFile(const char* filename)
 	HANDLE file;
 	BITMAPFILEHEADER fileHeader;
 	BITMAPINFOHEADER fileInfo;
-	DWORD filePosition = 0;
+	unsigned long filePosition = 0;
 
 	file = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
@@ -142,8 +142,8 @@ void BMPImage::fromFile(const char* filename)
 		this->data[i] = new RGBcol[fileInfo.biHeight];
 	}
 
-	DWORD32 x, y = fileInfo.biHeight - 1;
-	BYTE temp;
+	unsigned int x, y = fileInfo.biHeight - 1;
+	unsigned char temp;
 	
 	while (y + 1 > 0)															//Necessario in quanto unsigned
 	{
@@ -165,9 +165,10 @@ void BMPImage::fromFile(const char* filename)
 }
 void BMPImage::negative()
 {
-	for (DWORD32 x = 0; x < this->width; x++)
+	unsigned int x, y;
+	for (x = 0; x < this->width; x++)
 	{
-		for (DWORD32 y = 0; y < this->height; y++)
+		for (y = 0; y < this->height; y++)
 		{
 			this->data[x][y].R = 255 - this->data[x][y].R;
 			this->data[x][y].G = 255 - this->data[x][y].G;
@@ -175,14 +176,14 @@ void BMPImage::negative()
 		}
 	}
 }
-void BMPImage::contrastEmphasis(const BYTE min, const BYTE max)
+void BMPImage::contrastEmphasis(const unsigned char min, const unsigned char max)
 {
 
 	if (max < min) return;														//Non fa niente con dati errati
-
-	for (DWORD32 x = 0; x < this->width; x++)
+	unsigned int x, y;
+	for (x = 0; x < this->width; x++)
 	{
-		for (DWORD32 y = 0; y < this->height; y++)
+		for (y = 0; y < this->height; y++)
 		{
 			if (this->data[x][y].R < min) this->data[x][y].R = 0;
 			else if (this->data[x][y].R > max) this->data[x][y].R = 255;
@@ -198,11 +199,12 @@ void BMPImage::contrastEmphasis(const BYTE min, const BYTE max)
 		}
 	}
 }
-void BMPImage::binarize(const BYTE threshold)
+void BMPImage::binarize(const unsigned char threshold)
 {
-	for (DWORD32 x = 0; x < this->width; x++)
+	unsigned int x, y;
+	for (x = 0; x < this->width; x++)
 	{
-		for (DWORD32 y = 0; y < this->height; y++)
+		for (y = 0; y < this->height; y++)
 		{
 			if (this->data[x][y].R < threshold) this->data[x][y].R = 0;
 			else this->data[x][y].R = 255;
@@ -218,16 +220,17 @@ void BMPImage::binarize(const BYTE threshold)
 
 void BMPImage::toGrayscale()
 {
-	BYTE Y;
+	unsigned char luma;
+	unsigned int x, y;
 
-	for (DWORD32 x = 0; x < this->width; x++)
+	for (x = 0; x < this->width; x++)
 	{
-		for (DWORD32 y = 0; y < this->height; y++)
+		for (y = 0; y < this->height; y++)
 		{
-			Y = (BYTE) 0.21 * (this->data[x][y].R) + 0.72 * (this->data[x][y].R) + 0.07 * (this->data[x][y].R);
-			this->data[x][y].R = Y;
-			this->data[x][y].G = Y;
-			this->data[x][y].B = Y;
+			luma = (unsigned char) 0.21 * (this->data[x][y].R) + 0.72 * (this->data[x][y].R) + 0.07 * (this->data[x][y].R);
+			this->data[x][y].R = luma;
+			this->data[x][y].G = luma;
+			this->data[x][y].B = luma;
 		}
 	}
 }

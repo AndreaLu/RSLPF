@@ -13,11 +13,11 @@
 
 struct RGBcol
 {
-	BYTE R;
-	BYTE B;
-	BYTE G;
+	unsigned char R;
+	unsigned char B;
+	unsigned char G;
 	RGBcol() { R = 0; G = 0; B = 0; }
-	RGBcol(const BYTE r, const BYTE g, const BYTE b) { R = r; G = g; B = b; }
+	RGBcol(const unsigned char r, const unsigned char g, const unsigned char b) { R = r; G = g; B = b; }
 };
 class BMPImage
 {
@@ -36,8 +36,8 @@ public:
 		const  int x1, const  int y1, const RGBcol color);
 	void fromFile(const char* filename);
 	void negative();
-	void contrastEmphasis(const BYTE min, const BYTE max);
-	void binarize(const BYTE threshold);
+	void contrastEmphasis(const unsigned char min, const unsigned char max);
+	void binarize(const unsigned char threshold);
 	void toGrayscale();
 
 };
@@ -58,22 +58,25 @@ private:
 public:
 	Sequence();
 	Sequence(float* existing);
-
-	Sequence operator * (Sequence h){
-		unsigned int totalLenght = (this->lenght + h.lenght - 1);
-		unsigned int i, j;
-		float* y = new float[totalLenght];
-
-		for (i = 0; i < totalLenght; i++)
-		{
-			y[i] = 0;
-			for (j = 0; j <  ; j++)
-			{
-				y[i] += this->data[i] * h.data[j - i];
-			}
-		}
-	
-	}
+	Sequence operator * (Sequence h);
+	void dft();
+	void fft();
 };
-
+struct YCrCb{							//1 Byte di luminanza, 2 Byte con segno di crominanza
+	unsigned char Y;
+	signed char Cr;
+	signed char Cb;
+	YCrCb() { Y = 0; Cr = 0; Cb = 0; }
+	YCrCb(const unsigned char _Y, const signed char _Cr, const signed char _Cb) { Y = _Y; Cr = _Cr; Cb = _Cb; }
+};
+class YCImage{
+private:
+	unsigned int width;
+	unsigned int height;
+	YCrCb** data;
+public:
+	YCImage();
+	YCImage(YCrCb** existing, const unsigned int Width, const unsigned int Height);
+	void toGrayscale();
+};
 #endif
