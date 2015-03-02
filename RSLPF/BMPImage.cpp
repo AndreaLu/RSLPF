@@ -87,11 +87,6 @@ void BMPImage::set(const unsigned int x, const unsigned int y, const RGBcol colo
 	this->data[x][y] = color;							//No need to check if unsigned < 0
 }
 
-int sign(int a)
-{
-	if (a >= 0) return(1);
-	if (a < 0) return(0);
-}
 void BMPImage::drawLine(const int x0, const int y0,
 						const int x1, const int y1, 
 						const RGBcol color)
@@ -108,7 +103,7 @@ void BMPImage::drawLine(const int x0, const int y0,
 		if (e2 < dy) { err += dx; y += sy; }
 	}
 }
-void BMPImage::fromFile(const char* filename)
+bool BMPImage::fromFile(const char* filename)
 {
 	HANDLE file;
 	BITMAPFILEHEADER fileHeader;
@@ -118,9 +113,8 @@ void BMPImage::fromFile(const char* filename)
 	file = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
 	if (file == INVALID_HANDLE_VALUE){
-		std::cout << "Unable to open file." << std::endl;
-		system("pause");
-		return;
+		std::cout << "Impossibile aprire il file." << std::endl;
+		return(false);
 	}
 
 	ReadFile(file, &fileHeader, sizeof(BITMAPFILEHEADER), &filePosition, NULL);
@@ -128,25 +122,24 @@ void BMPImage::fromFile(const char* filename)
 
 	if (fileHeader.bfType != BMPTYPE || fileInfo.biBitCount != 24 )												//Controlla che il file in questione sia un BMP 24-bit
 	{
-		std::cout << "Unknown BMP format." << std::endl;
-		system("pause");
-		return;
+		std::cout << "Formato BMP incompatibile, utilizza 24bit non compresso." << std::endl;
+		return(false);
 	}
 
 	this->height = fileInfo.biHeight;
 	this->width = fileInfo.biWidth;
-	this->data = new RGBcol*[fileInfo.biWidth];
 
-	for (int i = 0; i < fileInfo.biWidth; i++)									//Alloca la memoria per contenere l'immagine
-	{
+	//Alloca la memoria per contenere l'immagine
+	this->data = new RGBcol*[fileInfo.biWidth];
+	for (int i = 0; i < fileInfo.biWidth; i++)
 		this->data[i] = new RGBcol[fileInfo.biHeight];
-	}
+
 
 	unsigned int x, y = fileInfo.biHeight - 1;
 	unsigned char temp;
 	
-	while (y + 1 > 0)															//Necessario in quanto unsigned
-	{
+	//Leggo il contenuto dell'immagine
+	while (y+1 >  0) {
 		x = 0;
 		while (x < fileInfo.biWidth)
 		{

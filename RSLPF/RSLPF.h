@@ -34,7 +34,7 @@ public:
 	void set(const unsigned int x, const unsigned int y, const RGBcol color); //unsigned int per evitare check inutili
 	void drawLine(const int x0, const int y0, //const int invece di unsigned int per permettere di iniziare le righe anche fuori dall'immagine
 		const  int x1, const  int y1, const RGBcol color);
-	void fromFile(const char* filename);
+	bool fromFile(const char* filename);
 	void negative();
 	void contrastEmphasis(const unsigned char min, const unsigned char max);
 	void binarize(const unsigned char threshold);
@@ -69,14 +69,6 @@ struct YCrCb{							//1 Byte di luminanza, 2 Byte con segno di crominanza
 	YCrCb() { Y = 0; Cr = 0; Cb = 0; }
 	YCrCb(const unsigned char _Y, const signed char _Cr, const signed char _Cb) { Y = _Y; Cr = _Cr; Cb = _Cb; }
 };
-class YCImage{
-private:
-	unsigned int width;
-	unsigned int height;
-	YCrCb** data;
-public:
-	YCImage();
-	YCImage(YCrCb** existing, const unsigned int Width, const unsigned int Height);
-	void toGrayscale();
-};
+//Invece di avere YCrCb image bisogna sviluppare una classe image che possa essere utilizzata con entrambi gli standard
+
 #endif
