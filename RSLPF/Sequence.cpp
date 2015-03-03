@@ -51,3 +51,18 @@ Sequence& Sequence::operator+ (Sequence& h){
 	Sequence return_V(y);
 	return return_V;
 }
+
+void Sequence::normalize(){
+	float maxV = 0;
+	unsigned int i;
+
+	for (i = 0; i < this->lenght; i++){
+		maxV = max(maxV, abs(this->data[i]));
+	}
+
+	if (maxV == 0) return;			//Sequenza di zeri
+
+	for (i = 0; i < this->lenght; i++){
+		this->data[i] = this->data[i] / maxV;
+	}
+}

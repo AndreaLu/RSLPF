@@ -63,6 +63,7 @@ public:
 	Sequence& operator+ (Sequence& h);  //Somma membro-a-membro di due sequenze
 	void dft();
 	void fft();
+	void normalize();					//Tutti i valori [-1, 1]
 };
 struct YCrCb{							//1 Byte di luminanza, 2 Byte con segno di crominanza
 	unsigned char Y;
