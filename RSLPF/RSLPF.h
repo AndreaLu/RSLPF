@@ -54,10 +54,11 @@ private:
 class Sequence{
 private:
 	float* data;
-	unsigned int lenght;
+	unsigned int length;
 public:
 	Sequence();
-	Sequence(float* existing);
+	Sequence(unsigned int length);
+	Sequence(Sequence& existing);
 	Sequence& operator* (Sequence& h);  //Convoluzione di due sequenze
 	Sequence& operator^ (Sequence& h);	//Prodotto membro-a-membro di due sequenze
 	Sequence& operator+ (Sequence& h);  //Somma membro-a-membro di due sequenze
@@ -65,13 +66,5 @@ public:
 	void fft();
 	void normalize();					//Tutti i valori [-1, 1]
 };
-struct YCrCb{							//1 Byte di luminanza, 2 Byte con segno di crominanza
-	unsigned char Y;
-	signed char Cr;
-	signed char Cb;
-	YCrCb() { Y = 0; Cr = 0; Cb = 0; }
-	YCrCb(const unsigned char _Y, const signed char _Cr, const signed char _Cb) { Y = _Y; Cr = _Cr; Cb = _Cb; }
-};
-//Invece di avere YCrCb image bisogna sviluppare una classe image che possa essere utilizzata con entrambi gli standard
-
+//Basta con sta struttura Y Cr Cb
 #endif
