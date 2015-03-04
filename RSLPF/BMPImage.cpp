@@ -42,10 +42,10 @@ void BMPImage::toFile(const char* filename)
 	file = CreateFileA(filename, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);   //Sets up the new bmp to be written to
 
 	fileHeader.bfType = BMPTYPE;                                                                         //Sets our type to BM or bmp
-	fileHeader.bfSize = sizeof(fileHeader.bfOffBits) + sizeof(RGBTRIPLE);                              //Sets the size equal to the size of the header struct
+	fileHeader.bfSize = sizeof(BITMAPINFOHEADER) + sizeof(BITMAPFILEHEADER) + 3 * this->width*this->height;                             //Sets the size equal to the size of the header struct
 	fileHeader.bfReserved1 = 0;                                                                        //sets the reserves to 0
 	fileHeader.bfReserved2 = 0;
-	fileHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);                        //Sets offbits equal to the size of file and info header
+	fileHeader.bfOffBits = (sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER));                     //Sets offbits equal to the size of file and info header
 
 	fileInfo.biSize = sizeof(BITMAPINFOHEADER);
 	fileInfo.biWidth = this->width;
@@ -53,7 +53,7 @@ void BMPImage::toFile(const char* filename)
 	fileInfo.biPlanes = 1;
 	fileInfo.biBitCount = 24;
 	fileInfo.biCompression = BI_RGB;
-	fileInfo.biSizeImage = this->height * this->width * (24 / 8); //3
+	fileInfo.biSizeImage = this->height * this->width * (3); //3
 	fileInfo.biXPelsPerMeter = 2400;
 	fileInfo.biYPelsPerMeter = 2400;
 	fileInfo.biClrImportant = 0;
