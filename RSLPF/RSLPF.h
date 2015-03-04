@@ -65,6 +65,7 @@ public:
 	void dft();
 	void fft();
 	void normalize();					//Tutti i valori [-1, 1]
+	void lpf(const float sampleRate, const float cut_off_frequency);
 };
 //Basta con sta struttura Y Cr Cb
 #endif
