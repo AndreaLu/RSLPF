@@ -65,3 +65,14 @@ void Sequence::normalize(){
 		this->data[i] = this->data[i] / maxV;
 	}
 }
+
+void Sequence::lpf(const float sampleRate, const float cut_off_frequency){
+	unsigned int i;
+	
+	float coeff_a = 1 / (abs(sampleRate) + abs(cut_off_frequency));
+	float coeff_b = abs(sampleRate) * coeff_a;
+
+	for (i = 1; i < this->length; i++){
+		this->data[i] = coeff_a * this->data[i] + coeff_b * this->data[i - 1];
+	}
+}
