@@ -10,5 +10,6 @@ int main()
 	BMPImage prova;
 	prova.fromFile("amici_miei.bmp");
 	prova.toFile("prova.bmp");
+	system("prova.bmp");
 	system("pause");
 }

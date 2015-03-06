@@ -86,12 +86,10 @@ bool BMPImage::fromFile(const char* fileName){
 
 	//Leggo il contenuto dell'immagine
 	
-	i = fileInfo.biHeight - 1;
-	while (i){
+	i = fileInfo.biHeight;
+	while (i--){
 		ReadFile(file, this->data[i], 3 * fileInfo.biWidth, &filePosition, NULL);
-		i--;
 	}
-	ReadFile(file, this->data[0], 3 * fileInfo.biWidth, &filePosition, NULL);
 
 	CloseHandle(file);
 	return(true);
@@ -130,14 +128,12 @@ bool BMPImage::toFile(const char* fileName){
 	WriteFile(file, &fileHeader, sizeof(fileHeader), &filePosition, NULL);
 	WriteFile(file, &fileInfo, sizeof(fileInfo), &filePosition, NULL);
 
-	unsigned int i = this->height - 1;
+	unsigned int i = this->height;
 
-	while (i){
+	while (i--){
 		WriteFile(file, this->data[i], this->width * 3, &filePosition, NULL);
-		i--;
 	}
-	WriteFile(file, this->data[0], this->width * 3, &filePosition, NULL);
-
+	
 	CloseHandle(file);
 	return(true);
 }
