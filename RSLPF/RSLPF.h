@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <ctime>
 #include <Windows.h>
 #define SEQUENCE_SIZE 200
 
@@ -13,9 +14,9 @@
 
 struct RGBcol
 {
-	unsigned char R;
 	unsigned char B;
 	unsigned char G;
+	unsigned char R;
 	RGBcol() { R = 0; G = 0; B = 0; }
 	RGBcol(const unsigned char r, const unsigned char g, const unsigned char b) { R = r; G = g; B = b; }
 };
@@ -30,16 +31,14 @@ public:
 	BMPImage(const unsigned int width, const unsigned int height, const RGBcol color);
 	void Clear(const RGBcol color);
 	void Clear(); //clear black
-	void toFile(const char* filename);
 	void set(const unsigned int x, const unsigned int y, const RGBcol color); //unsigned int per evitare check inutili
-	void drawLine(const int x0, const int y0, //const int invece di unsigned int per permettere di iniziare le righe anche fuori dall'immagine
-		const  int x1, const  int y1, const RGBcol color);
-	bool fromFile(const char* filename);
+	void drawLine(const int x0, const int y0, const  int x1, const  int y1, const RGBcol color);  //const int invece di unsigned int per permettere di iniziare le righe anche fuori dall'immagine 
+	bool fromFile(const char* fileName);
+	bool toFile(const char* fileName);
 	void negative();
 	void contrastEmphasis(const unsigned char min, const unsigned char max);
 	void binarize(const unsigned char threshold);
 	void toGrayscale();
-
 };
 class Program
 {

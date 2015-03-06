@@ -6,7 +6,6 @@ BMPImage::BMPImage()
 	this->width = 0;
 	this->height = 0;
 }
-
 BMPImage::BMPImage(const unsigned int width, const unsigned int height, const RGBcol color)
 {
 	this->width = width;
@@ -18,6 +17,7 @@ BMPImage::BMPImage(const unsigned int width, const unsigned int height, const RG
 			this->data[i][j] = color;
 	}
 }
+
 void BMPImage::Clear(const RGBcol color)
 {
 	for (int i = 0; i < this->width;i++)
@@ -32,64 +32,12 @@ void BMPImage::Clear()
 		this->data[i][j] = black;
 }
 
-void BMPImage::toFile(const char* filename)
-{
-	HANDLE file;
-	BITMAPFILEHEADER fileHeader;
-	BITMAPINFOHEADER fileInfo;
-	DWORD write = 0;
-
-	file = CreateFileA(filename, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);   //Sets up the new bmp to be written to
-
-	fileHeader.bfType = BMPTYPE;                                                                         //Sets our type to BM or bmp
-	fileHeader.bfSize = sizeof(BITMAPINFOHEADER) + sizeof(BITMAPFILEHEADER) + 3 * this->width*this->height;                             //Sets the size equal to the size of the header struct
-	fileHeader.bfReserved1 = 0;                                                                        //sets the reserves to 0
-	fileHeader.bfReserved2 = 0;
-	fileHeader.bfOffBits = (sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER));                     //Sets offbits equal to the size of file and info header
-
-	fileInfo.biSize = sizeof(BITMAPINFOHEADER);
-	fileInfo.biWidth = this->width;
-	fileInfo.biHeight = this->height;
-	fileInfo.biPlanes = 1;
-	fileInfo.biBitCount = 24;
-	fileInfo.biCompression = BI_RGB;
-	fileInfo.biSizeImage = this->height * this->width * (3); //3
-	fileInfo.biXPelsPerMeter = 2400;
-	fileInfo.biYPelsPerMeter = 2400;
-	fileInfo.biClrImportant = 0;
-	fileInfo.biClrUsed = 0;
-
-	WriteFile(file, &fileHeader, sizeof(fileHeader), &write, NULL);
-	WriteFile(file, &fileInfo, sizeof(fileInfo), &write, NULL);
-	unsigned int W;
-	unsigned int H;
-	W = this->width; H = this->height;
-	LPVOID pointerR,pointerG,pointerB;
-
-	for (unsigned int y = H - 1; y >= 0; y--) {
-		for (unsigned int x = 0; x < W; x++) {
-			pointerR = &(this->data[x][y].R);
-			pointerG = &(this->data[x][y].G);
-			pointerB = &(this->data[x][y].B);
-			WriteFile(file, pointerB, 1, &write, NULL);
-			WriteFile(file, pointerG, 1, &write, NULL);
-			WriteFile(file, pointerR, 1, &write, NULL);
-		}
-		if (y == 0) break;
-	}
-
-	CloseHandle(file);
-}
-
 void BMPImage::set(const unsigned int x, const unsigned int y, const RGBcol color)
 {
 	if (x >= this->width || y >= this->height) return;
 	this->data[x][y] = color;							//No need to check if unsigned < 0
 }
-
-void BMPImage::drawLine(const int x0, const int y0,
-						const int x1, const int y1, 
-						const RGBcol color)
+void BMPImage::drawLine(const int x0, const int y0, const int x1, const int y1, const RGBcol color)
 {
 	int x = x0, y = y0;
 	int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
@@ -103,24 +51,24 @@ void BMPImage::drawLine(const int x0, const int y0,
 		if (e2 < dy) { err += dx; y += sy; }
 	}
 }
-bool BMPImage::fromFile(const char* filename)
-{
+
+bool BMPImage::fromFile(const char* fileName){
 	HANDLE file;
 	BITMAPFILEHEADER fileHeader;
 	BITMAPINFOHEADER fileInfo;
 	unsigned long filePosition = 0;
 
-	file = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	file = CreateFileA(fileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
 	if (file == INVALID_HANDLE_VALUE){
-		std::cout << "Impossibile aprire il file." << std::endl;
+		std::cout << "Impossibile aprire il file per la lettura." << std::endl;
 		return(false);
 	}
 
 	ReadFile(file, &fileHeader, sizeof(BITMAPFILEHEADER), &filePosition, NULL);
 	ReadFile(file, &fileInfo, sizeof(BITMAPINFOHEADER), &filePosition , NULL);
 
-	if (fileHeader.bfType != BMPTYPE || fileInfo.biBitCount != 24 )												//Controlla che il file in questione sia un BMP 24-bit
+	if (fileHeader.bfType != BMPTYPE || fileInfo.biBitCount != 24)												//Controlla che il file in questione sia un BMP 24-bit
 	{
 		std::cout << "Formato BMP incompatibile, utilizza 24bit non compresso." << std::endl;
 		return(false);
@@ -129,33 +77,71 @@ bool BMPImage::fromFile(const char* filename)
 	this->height = fileInfo.biHeight;
 	this->width = fileInfo.biWidth;
 
+	unsigned int i;
+
 	//Alloca la memoria per contenere l'immagine
-	this->data = new RGBcol*[fileInfo.biWidth];
-	for (int i = 0; i < fileInfo.biWidth; i++)
-		this->data[i] = new RGBcol[fileInfo.biHeight];
+	this->data = new RGBcol*[fileInfo.biHeight];
+	for (i = 0; i < fileInfo.biHeight; i++)
+		this->data[i] = new RGBcol[fileInfo.biWidth];
 
-
-	unsigned int x, y = fileInfo.biHeight - 1;
-	unsigned char temp;
-	
 	//Leggo il contenuto dell'immagine
-	while (y+1 >  0) {
-		x = 0;
-		while (x < fileInfo.biWidth)
-		{
-			ReadFile(file, &temp, 1, &filePosition, NULL);
-			this->data[x][y].B = temp;
-			ReadFile(file, &temp, 1, &filePosition, NULL);
-			this->data[x][y].G = temp;
-			ReadFile(file, &temp, 1, &filePosition, NULL);
-			this->data[x][y].R = temp;
-			x++;
-		}
-		y--;
+	
+	i = fileInfo.biHeight - 1;
+	while (i){
+		ReadFile(file, this->data[i], 3 * fileInfo.biWidth, &filePosition, NULL);
+		i--;
 	}
+	ReadFile(file, this->data[0], 3 * fileInfo.biWidth, &filePosition, NULL);
 
 	CloseHandle(file);
+	return(true);
 }
+bool BMPImage::toFile(const char* fileName){
+	HANDLE file;
+	BITMAPFILEHEADER fileHeader;
+	BITMAPINFOHEADER fileInfo;
+	unsigned long filePosition = 0;
+
+	file = CreateFileA(fileName, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);   //Sets up the new bmp to be written to
+
+	if (file == INVALID_HANDLE_VALUE){
+		std::cout << "Impossibile aprire il file per la scrittura." << std::endl;
+		return(false);
+	}
+
+	fileHeader.bfType = BMPTYPE;                                                                         //Sets our type to BM or bmp
+	fileHeader.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + 3 * (this->width * this->height);                             //Sets the size equal to the size of the header struct
+	fileHeader.bfReserved1 = 0;                                                                        //sets the reserves to 0
+	fileHeader.bfReserved2 = 0;
+	fileHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);                     //Sets offbits equal to the size of file and info header
+
+	fileInfo.biSize = sizeof(BITMAPINFOHEADER);
+	fileInfo.biWidth = this->width;
+	fileInfo.biHeight = this->height;
+	fileInfo.biPlanes = 1;
+	fileInfo.biBitCount = 24;
+	fileInfo.biCompression = BI_RGB;
+	fileInfo.biSizeImage = 0; //This may be set to zero for BI_RGB bitmaps
+	fileInfo.biXPelsPerMeter = 2835;
+	fileInfo.biYPelsPerMeter = 2835;
+	fileInfo.biClrImportant = 0;
+	fileInfo.biClrUsed = 0;
+
+	WriteFile(file, &fileHeader, sizeof(fileHeader), &filePosition, NULL);
+	WriteFile(file, &fileInfo, sizeof(fileInfo), &filePosition, NULL);
+
+	unsigned int i = this->height - 1;
+
+	while (i){
+		WriteFile(file, this->data[i], this->width * 3, &filePosition, NULL);
+		i--;
+	}
+	WriteFile(file, this->data[0], this->width * 3, &filePosition, NULL);
+
+	CloseHandle(file);
+	return(true);
+}
+
 void BMPImage::negative()
 {
 	unsigned int x, y;
@@ -210,7 +196,6 @@ void BMPImage::binarize(const unsigned char threshold)
 		}
 	}
 }
-
 void BMPImage::toGrayscale()
 {
 	unsigned char luma;

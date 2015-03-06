@@ -8,10 +8,7 @@ int main()
 	system("pause");*/
 
 	BMPImage prova;
-	prova.fromFile("amici_miei1.bmp");
-	prova.toGrayscale();
-	prova.binarize(80);
-	prova.toFile("test1.bmp");
-	system("test1.bmp");
+	prova.fromFile("amici_miei.bmp");
+	prova.toFile("prova.bmp");
 	system("pause");
 }
