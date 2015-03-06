@@ -22,20 +22,20 @@ void BMPImage::Clear(const RGBcol color)
 {
 	for (int i = 0; i < this->width;i++)
 	for (int j = 0; j < this->height; j++)
-		this->data[i][j] = color;
+		this->data[j][i] = color;
 }
 void BMPImage::Clear()
 {
 	RGBcol black = RGBcol(0, 0, 0);
 	for (int i = 0; i < this->width; i++)
 	for (int j = 0; j < this->height; j++)
-		this->data[i][j] = black;
+		this->data[j][i] = black;
 }
 
 void BMPImage::set(const unsigned int x, const unsigned int y, const RGBcol color)
 {
 	if (x >= this->width || y >= this->height) return;
-	this->data[x][y] = color;							//No need to check if unsigned < 0
+	this->data[y][x] = color;							//No need to check if unsigned < 0
 }
 void BMPImage::drawLine(const int x0, const int y0, const int x1, const int y1, const RGBcol color)
 {
@@ -149,9 +149,9 @@ void BMPImage::negative()
 	{
 		for (y = 0; y < this->height; y++)
 		{
-			this->data[x][y].R = 255 - this->data[x][y].R;
-			this->data[x][y].G = 255 - this->data[x][y].G;
-			this->data[x][y].B = 255 - this->data[x][y].B;
+			this->data[y][x].R = 255 - this->data[y][x].R;
+			this->data[y][x].G = 255 - this->data[y][x].G;
+			this->data[y][x].B = 255 - this->data[y][x].B;
 		}
 	}
 }
@@ -164,17 +164,17 @@ void BMPImage::contrastEmphasis(const unsigned char min, const unsigned char max
 	{
 		for (y = 0; y < this->height; y++)
 		{
-			if (this->data[x][y].R < min) this->data[x][y].R = 0;
-			else if (this->data[x][y].R > max) this->data[x][y].R = 255;
-			else this->data[x][y].R *= 255 / (max - min);
+			if (this->data[y][x].R < min) this->data[y][x].R = 0;
+			else if (this->data[y][x].R > max) this->data[y][x].R = 255;
+			else this->data[y][x].R *= 255 / (max - min);
 			
-			if (this->data[x][y].G < min) this->data[x][y].G = 0;
-			else if (this->data[x][y].G > max) this->data[x][y].G = 255;
-			else this->data[x][y].G *= 255 / (max - min);
+			if (this->data[y][x].G < min) this->data[y][x].G = 0;
+			else if (this->data[y][x].G > max) this->data[y][x].G = 255;
+			else this->data[y][x].G *= 255 / (max - min);
 
-			if (this->data[x][y].B < min) this->data[x][y].B = 0;
-			else if (this->data[x][y].B > max) this->data[x][y].B = 255;
-			else this->data[x][y].B *= 255 / (max - min);
+			if (this->data[y][x].B < min) this->data[y][x].B = 0;
+			else if (this->data[y][x].B > max) this->data[y][x].B = 255;
+			else this->data[y][x].B *= 255 / (max - min);
 		}
 	}
 }
@@ -185,14 +185,14 @@ void BMPImage::binarize(const unsigned char threshold)
 	{
 		for (y = 0; y < this->height; y++)
 		{
-			if (this->data[x][y].R < threshold) this->data[x][y].R = 0;
-			else this->data[x][y].R = 255;
+			if (this->data[y][x].R < threshold) this->data[y][x].R = 0;
+			else this->data[y][x].R = 255;
 
-			if (this->data[x][y].G < threshold) this->data[x][y].G = 0;
-			else this->data[x][y].G = 255;
+			if (this->data[y][x].G < threshold) this->data[y][x].G = 0;
+			else this->data[y][x].G = 255;
 			
-			if (this->data[x][y].B < threshold) this->data[x][y].B = 0;
-			else this->data[x][y].B = 255;
+			if (this->data[y][x].B < threshold) this->data[y][x].B = 0;
+			else this->data[y][x].B = 255;
 		}
 	}
 }
@@ -205,10 +205,10 @@ void BMPImage::toGrayscale()
 	{
 		for (y = 0; y < this->height; y++)
 		{
-			luma = (unsigned char) 0.21 * (this->data[x][y].R) + 0.72 * (this->data[x][y].R) + 0.07 * (this->data[x][y].R);
-			this->data[x][y].R = luma;
-			this->data[x][y].G = luma;
-			this->data[x][y].B = luma;
+			luma = (unsigned char) 0.2126 * (this->data[y][x].R) + 0.7152 * (this->data[y][x].G) + 0.0722 * (this->data[y][x].B);
+			this->data[y][x].R = luma;
+			this->data[y][x].G = luma;
+			this->data[y][x].B = luma;
 		}
 	}
 }
