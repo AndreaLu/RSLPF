@@ -10,32 +10,31 @@ BMPImage::BMPImage(const unsigned int width, const unsigned int height, const RG
 {
 	this->width = width;
 	this->height = height;
-	this->data = new RGBcol*[width];
-	for (int i = 0; i < width; i++) {
-		this->data[i] = new RGBcol[height];
-		for (int j = 0; j < height; j++)
-			this->data[i][j] = color;
-	}
+	this->data = new RGBcol[width*height];
+	for (unsigned int i = 0; i < width*height; i++)
+		this->data[i] = color;
 }
 
 void BMPImage::Clear(const RGBcol color)
 {
-	for (int i = 0; i < this->width;i++)
-	for (int j = 0; j < this->height; j++)
-		this->data[j][i] = color;
+
+	for (int j = 0; j < this->height*this->width; j++)
+		this->data[j] = color;
 }
 void BMPImage::Clear()
 {
 	RGBcol black = RGBcol(0, 0, 0);
-	for (int i = 0; i < this->width; i++)
-	for (int j = 0; j < this->height; j++)
-		this->data[j][i] = black;
+	for (int j = 0; j < this->height*this->width; j++)
+		this->data[j] = black;
 }
-
+RGBcol BMPImage::get(unsigned int x, unsigned int y)
+{
+	return(this->data[x + (this->height - y)*this->width]);	
+}
 void BMPImage::set(const unsigned int x, const unsigned int y, const RGBcol color)
 {
 	if (x >= this->width || y >= this->height) return;
-	this->data[y][x] = color;							//No need to check if unsigned < 0
+	this->data[(this->height - y)*this->width + x] = color;
 }
 void BMPImage::drawLine(const int x0, const int y0, const int x1, const int y1, const RGBcol color)
 {
@@ -80,17 +79,8 @@ bool BMPImage::fromFile(const char* fileName){
 	unsigned int i;
 
 	//Alloca la memoria per contenere l'immagine
-	this->data = new RGBcol*[fileInfo.biHeight];
-	for (i = 0; i < fileInfo.biHeight; i++)
-		this->data[i] = new RGBcol[fileInfo.biWidth];
-
-	//Leggo il contenuto dell'immagine
-	
-	i = fileInfo.biHeight;
-	while (i--){
-		ReadFile(file, this->data[i], 3 * fileInfo.biWidth, &filePosition, NULL);
-	}
-
+	this->data = new RGBcol[fileInfo.biHeight*fileInfo.biWidth];
+	ReadFile(file, this->data, 3 * fileInfo.biHeight*fileInfo.biWidth, &filePosition, NULL);
 	CloseHandle(file);
 	return(true);
 }
@@ -120,91 +110,59 @@ bool BMPImage::toFile(const char* fileName){
 	fileInfo.biBitCount = 24;
 	fileInfo.biCompression = BI_RGB;
 	fileInfo.biSizeImage = 0; //This may be set to zero for BI_RGB bitmaps
-	fileInfo.biXPelsPerMeter = 2835;
-	fileInfo.biYPelsPerMeter = 2835;
+	fileInfo.biXPelsPerMeter = 0;
+	fileInfo.biYPelsPerMeter = 0;
 	fileInfo.biClrImportant = 0;
 	fileInfo.biClrUsed = 0;
 
 	WriteFile(file, &fileHeader, sizeof(fileHeader), &filePosition, NULL);
 	WriteFile(file, &fileInfo, sizeof(fileInfo), &filePosition, NULL);
 
-	unsigned int i = this->height;
+	WriteFile(file, this->data, this->width*this->height * 3, &filePosition, NULL);
 
-	while (i--){
-		WriteFile(file, this->data[i], this->width * 3, &filePosition, NULL);
-	}
-	
 	CloseHandle(file);
 	return(true);
 }
 
 void BMPImage::negative()
 {
+	RGBcol col;
 	unsigned int x, y;
 	for (x = 0; x < this->width; x++)
 	{
 		for (y = 0; y < this->height; y++)
 		{
-			this->data[y][x].R = 255 - this->data[y][x].R;
-			this->data[y][x].G = 255 - this->data[y][x].G;
-			this->data[y][x].B = 255 - this->data[y][x].B;
+			col = this->get(x, y);
+			col.R = 255 - col.R; col.B = 255 - col.B; col.G = 255 - col.G;
+			this->set(x, y, col);
 		}
 	}
 }
 void BMPImage::contrastEmphasis(const unsigned char min, const unsigned char max)
 {
-
-	if (max < min) return;														//Non fa niente con dati errati
-	unsigned int x, y;
-	for (x = 0; x < this->width; x++)
-	{
-		for (y = 0; y < this->height; y++)
-		{
-			if (this->data[y][x].R < min) this->data[y][x].R = 0;
-			else if (this->data[y][x].R > max) this->data[y][x].R = 255;
-			else this->data[y][x].R *= 255 / (max - min);
-			
-			if (this->data[y][x].G < min) this->data[y][x].G = 0;
-			else if (this->data[y][x].G > max) this->data[y][x].G = 255;
-			else this->data[y][x].G *= 255 / (max - min);
-
-			if (this->data[y][x].B < min) this->data[y][x].B = 0;
-			else if (this->data[y][x].B > max) this->data[y][x].B = 255;
-			else this->data[y][x].B *= 255 / (max - min);
-		}
-	}
+	 
 }
 void BMPImage::binarize(const unsigned char threshold)
 {
-	unsigned int x, y;
-	for (x = 0; x < this->width; x++)
+	RGBcol col;
+	for (unsigned int i = 0; i < this->width*this->height; i++)
 	{
-		for (y = 0; y < this->height; y++)
-		{
-			if (this->data[y][x].R < threshold) this->data[y][x].R = 0;
-			else this->data[y][x].R = 255;
-
-			if (this->data[y][x].G < threshold) this->data[y][x].G = 0;
-			else this->data[y][x].G = 255;
-			
-			if (this->data[y][x].B < threshold) this->data[y][x].B = 0;
-			else this->data[y][x].B = 255;
-		}
+		col = this->data[i];
+		col.R >= threshold ? col.R = 255 : col.R = 0;
+		col.G >= threshold ? col.G = 255 : col.G = 0;
+		col.B >= threshold ? col.B = 255 : col.B = 0;
+		this->data[i] = col;
 	}
 }
 void BMPImage::toGrayscale()
 {
-	unsigned char luma;
-	unsigned int x, y;
+}
+void BMPImage::transpose()
+{
+	BMPImage newimg = BMPImage(height, width, RGBcol(0, 0, 0));
+	for (unsigned int x = 0; x < width;x++)
+	for (unsigned int y = 0; y < height; y++)
+		newimg.set(y, x, this->get(x, y) );
+	newimg.toFile("C:\\Tests\\stocazz.bmp");
 
-	for (x = 0; x < this->width; x++)
-	{
-		for (y = 0; y < this->height; y++)
-		{
-			luma = (unsigned char) 0.2126 * (this->data[y][x].R) + 0.7152 * (this->data[y][x].G) + 0.0722 * (this->data[y][x].B);
-			this->data[y][x].R = luma;
-			this->data[y][x].G = luma;
-			this->data[y][x].B = luma;
-		}
-	}
 }
