@@ -78,6 +78,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BMPImage.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Program.cpp" />
+    <ClCompile Include="Sequence.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="RSLPF.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
